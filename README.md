@@ -46,3 +46,7 @@ npm run test:fast # solid style only, about a minute
 
 * **CITRONHAJ** (IKEA, 10 cl): 41 x 118.5 mm, measured on real jars (IKEA lists 40 x 120).
 * **GULDFISK** (IKEA, 6 cl): IKEA lists 40 x 80; the preset uses 41 x 79, an estimate. Please measure and correct it.
+
+## License
+
+[CC BY-NC-SA 4.0](LICENSE): free to use and remix with credit, no commercial use, remixes under the same license.
