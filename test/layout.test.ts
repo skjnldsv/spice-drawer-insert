@@ -5,12 +5,12 @@ import { render, close, defined } from './helpers.ts';
 
 const SOLID = { style: 'solid' };
 
-test('defaults (CITRONHAJ, 430 x 470 drawer): 9 columns, 3 rows of ~140 mm, 49 mm back bar, 2 slices', async () => {
+test('defaults (CITRONHAJ, 430 x 470 drawer): 9 columns, 3 rows of ~139 mm, 52 mm back bar, 2 slices', async () => {
   const { layout, mesh } = await render({ ...SOLID });
   assert.equal(layout.columns, 9);
   assert.equal(layout.rows, 3);
-  assert.ok(close(layout.rowLength, 140.17, 0.05), `row length ${layout.rowLength}`);
-  assert.equal(layout.leftover, 49);
+  assert.ok(close(layout.rowLength, 139.17, 0.05), `row length ${layout.rowLength}`);
+  assert.equal(layout.leftover, 52);
   assert.equal(layout.slicesModule, 2);
   assert.ok(close(layout.depthMid, 15.02, 0.05));
   assert.ok(close(mesh.size[2], 25.6), 'module height');

@@ -78,7 +78,7 @@ LC      = jar_length * ca + jar_diameter * sa + end_clearance; // pocket length 
 n_cols  = max(1, floor(Wuse / (2 * R + min_gap)));
 pitch   = Wuse / n_cols;
 L_min   = LC + min_gap;                                        // shortest possible row
-bar_min = 2 * R + 6;                                           // depth of a back bar holding spare jars
+bar_min = 2 * R + 9;                                           // depth of a back bar holding spare jars (4.5 mm walls)
 rows_b  = floor((Duse - bar_min) / L_min);             // rows that fit while keeping room for that bar
 has_bar = rows_b >= 1;
 rows_n  = has_bar ? rows_b : max(1, floor(Duse / L_min));
