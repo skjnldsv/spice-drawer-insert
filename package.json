@@ -1,0 +1,14 @@
+{
+  "name": "spice-drawer-insert",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Parametric OpenSCAD spice-jar drawer insert for MakerWorld, with a render test suite",
+  "scripts": {
+    "test": "node --test --test-concurrency=4 test/*.test.mjs",
+    "test:fast": "SPICE_FAST=1 node --test --test-concurrency=4 test/*.test.mjs"
+  },
+  "devDependencies": {
+    "openscad-wasm": "0.0.4"
+  }
+}
