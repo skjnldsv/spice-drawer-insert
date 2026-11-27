@@ -2,7 +2,7 @@
 // Slow with CGAL (about 20 s per render) so it is skipped when SPICE_FAST is set.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { render, close, FAST } from './helpers.mjs';
+import { render, close, FAST } from './helpers.ts';
 
 const opts = { skip: FAST ? 'SPICE_FAST set' : false };
 

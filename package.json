@@ -5,11 +5,17 @@
   "type": "module",
   "license": "CC-BY-NC-SA-4.0",
   "description": "Parametric OpenSCAD spice-jar drawer insert for MakerWorld, with a render test suite",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "test": "node --test --test-concurrency=4 test/*.test.mjs",
-    "test:fast": "SPICE_FAST=1 node --test --test-concurrency=4 test/*.test.mjs"
+    "test": "node --test --test-concurrency=4 test/*.test.ts",
+    "test:fast": "SPICE_FAST=1 node --test --test-concurrency=4 test/*.test.ts",
+    "typecheck": "tsc"
   },
   "devDependencies": {
-    "openscad-wasm": "0.0.4"
+    "@types/node": "24.19.4",
+    "openscad-wasm": "0.0.4",
+    "typescript": "7.0.2"
   }
 }

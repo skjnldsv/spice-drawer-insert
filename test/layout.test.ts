@@ -1,7 +1,7 @@
 // Layout rules, checked on solid renders (fast). One render per case.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { render, close } from './helpers.mjs';
+import { render, close, defined } from './helpers.ts';
 
 const SOLID = { style: 'solid' };
 
@@ -27,7 +27,7 @@ test('min_gap 10 gives 8 columns, cut between jars 4 + 4, two equal 214.75 mm pi
 });
 
 test('odd column count is cut through the middle of a jar, halves equal', async () => {
-  const [a, b] = await Promise.all([1, 2].map((slice_index) => render({ ...SOLID, slice_index })));
+  const [a, b] = await Promise.all([render({ ...SOLID, slice_index: 1 }), render({ ...SOLID, slice_index: 2 })]);
   assert.ok(close(a.mesh.size[0], b.mesh.size[0]));
   assert.ok(close(a.mesh.size[0], 214.75));
 });
@@ -36,14 +36,14 @@ test('tilt 0 and tilt 12 both render', async () => {
   for (const tilt of [0, 12]) {
     const { mesh, layout } = await render({ ...SOLID, tilt });
     assert.ok(mesh.manifold, `tilt ${tilt}: ${mesh.badEdges} bad edges`);
-    assert.ok(layout.depthMid > 0, `tilt ${tilt} depth ${layout.depthMid}`);
+    assert.ok(defined(layout.depthMid, 'depthMid') > 0, `tilt ${tilt} depth ${layout.depthMid}`);
   }
 });
 
 test('GULDFISK preset: shorter jars fit one more row', async () => {
   const { layout } = await render({ ...SOLID, jar_preset: 'guldfisk' });
   assert.equal(layout.rows, 4);
-  assert.ok(layout.rowLength < 110);
+  assert.ok(defined(layout.rowLength, 'rowLength') < 110);
 });
 
 test('custom jar 35 x 90', async () => {
@@ -56,7 +56,7 @@ test('small drawer 300 x 350 with other jars: slices still fit the A1 bed', asyn
   const { layout, mesh } = await render({ ...SOLID, drawer_width: 300, drawer_depth: 350, jar_preset: 'custom', custom_diameter: 35, custom_length: 90, tilt: 8, module_height: 22 });
   assert.ok(mesh.size[0] <= 252 && mesh.size[1] <= 252);
   assert.ok(close(mesh.size[2], 22));
-  assert.ok(layout.rows >= 2);
+  assert.ok(defined(layout.rows, 'rows') >= 2);
 });
 
 test('drawer too shallow for a back bar: no bar, rows fill the whole depth', async () => {

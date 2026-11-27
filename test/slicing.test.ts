@@ -1,27 +1,26 @@
 // The slices of a row must add up to the drawer width, and every piece must fit the bed.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { render, close } from './helpers.mjs';
+import { render, close, defined, type Params, type RenderResult } from './helpers.ts';
 
 const SOLID = { style: 'solid' };
 const WIDTH_MARGIN = 0.5;   // fit_margin in the script
 
-async function checkSlices(piece, base) {
+async function checkSlices(piece: 'module' | 'bar', base: Params): Promise<void> {
   const first = await render({ ...SOLID, ...base, piece, slice_index: 1 });
-  const n = piece === 'bar' ? first.layout.slicesBar : first.layout.slicesModule;
-  const results = [first];
+  const n = defined(piece === 'bar' ? first.layout.slicesBar : first.layout.slicesModule, `slices (${piece})`);
+  const results: RenderResult[] = [first];
   for (let i = 2; i <= n; i++) results.push(await render({ ...SOLID, ...base, piece, slice_index: i }));
   const total = results.reduce((s, r) => s + r.mesh.size[0], 0);
-  const width = (base.drawer_width ?? 430) - WIDTH_MARGIN;
+  const width = Number(base.drawer_width ?? 430) - WIDTH_MARGIN;
   assert.ok(close(total, width, 0.1), `${piece}: slices add up to ${total.toFixed(2)} instead of ${width}`);
   for (const [i, r] of results.entries()) {
     assert.ok(r.mesh.size[0] <= 252, `${piece} slice ${i + 1} is ${r.mesh.size[0].toFixed(1)} mm wide, too wide for the bed`);
     assert.ok(r.mesh.manifold, `${piece} slice ${i + 1}: ${r.mesh.badEdges} non manifold edges`);
   }
-  return n;
 }
 
-const CASES = [
+const CASES: Array<[name: string, base: Params]> = [
   ['defaults', {}],
   ['min_gap 10', { min_gap: 10 }],
   ['600 mm wide drawer', { drawer_width: 600 }],
@@ -29,7 +28,7 @@ const CASES = [
 ];
 
 for (const [name, base] of CASES) {
-  for (const piece of ['module', 'bar']) {
+  for (const piece of ['module', 'bar'] as const) {
     test(`${piece} slices add up to the drawer width: ${name}`, async () => {
       await checkSlices(piece, base);
     });
