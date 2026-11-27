@@ -14,7 +14,7 @@
     "typecheck": "tsc"
   },
   "devDependencies": {
-    "@types/node": "24.19.4",
+    "@types/node": "26.6.6",
     "openscad-wasm": "0.0.4",
     "typescript": "7.0.2"
   }
