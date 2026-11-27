@@ -9,7 +9,7 @@ test('defaults (CITRONHAJ, 430 x 470 drawer): 9 columns, 3 rows of ~140 mm, 49 m
   const { layout, mesh } = await render({ ...SOLID });
   assert.equal(layout.columns, 9);
   assert.equal(layout.rows, 3);
-  assert.ok(close(layout.rowLength, 140.33, 0.05), `row length ${layout.rowLength}`);
+  assert.ok(close(layout.rowLength, 140.17, 0.05), `row length ${layout.rowLength}`);
   assert.equal(layout.leftover, 49);
   assert.equal(layout.slicesModule, 2);
   assert.ok(close(layout.depthMid, 15.02, 0.05));
@@ -63,10 +63,19 @@ test('drawer too shallow for a back bar: no bar, rows fill the whole depth', asy
   const { layout, mesh } = await render({ ...SOLID, drawer_depth: 170 });
   assert.equal(layout.rows, 1);
   assert.equal(layout.leftover, 0);
-  assert.ok(close(mesh.size[1], 170));
+  assert.ok(close(mesh.size[1], 169.5));
 });
 
 test('too low a module is reported', async () => {
   const { layout } = await render({ ...SOLID, module_height: 12 });
   assert.ok(layout.warnings.some((w) => /too low/.test(w)), 'expected a "module too low" warning');
+});
+
+test('rows and back bar keep fit_margin of play on the depth, like on the width', async () => {
+  for (const base of [{}, { drawer_depth: 170 }, { jar_preset: 'guldfisk' }]) {
+    const { layout } = await render({ ...SOLID, ...base });
+    const depth = Number(base.drawer_depth ?? 470);
+    const used = defined(layout.rows, 'rows') * defined(layout.rowLength, 'rowLength') + defined(layout.leftover, 'leftover');
+    assert.ok(close(used, depth - 0.5, 0.01), `${JSON.stringify(base)}: rows + bar use ${used} mm of ${depth}`);
+  }
 });

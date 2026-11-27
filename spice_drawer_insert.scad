@@ -56,7 +56,7 @@ jar_length   = jar_preset == "citronhaj" ? 118.5 : (jar_preset == "guldfisk" ? 7
 pocket_clearance = 2;     // extra clearance on the pocket diameter
 end_clearance = 3;        // free play behind the lid
 floor_min = 4;            // material under the lowest point of a pocket
-fit_margin = 0.5;         // total slack kept on the width
+fit_margin = 0.5;         // total slack kept on the width and on the depth
 bed_width = 256;          // Bambu A1 print bed
 style = "hollow";         // "hollow" (open bottom, Y supports) or "solid"
 wall = 1.8;               // outer wall of the hollow style
@@ -71,6 +71,7 @@ ca = cos(a);  sa = sin(a);  ta = tan(a);
 R  = (jar_diameter + pocket_clearance) / 2;       // pocket radius
 H  = module_height;
 Wuse = drawer_width - fit_margin;
+Duse = drawer_depth - fit_margin;
 
 // --- modules (rows) ---
 LC      = jar_length * ca + jar_diameter * sa + end_clearance; // pocket length (vertical end walls)
@@ -78,11 +79,11 @@ n_cols  = max(1, floor(Wuse / (2 * R + min_gap)));
 pitch   = Wuse / n_cols;
 L_min   = LC + min_gap;                                        // shortest possible row
 bar_min = 2 * R + 6;                                           // depth of a back bar holding spare jars
-rows_b  = floor((drawer_depth - bar_min) / L_min);             // rows that fit while keeping room for that bar
+rows_b  = floor((Duse - bar_min) / L_min);             // rows that fit while keeping room for that bar
 has_bar = rows_b >= 1;
-rows_n  = has_bar ? rows_b : max(1, floor(drawer_depth / L_min));
+rows_n  = has_bar ? rows_b : max(1, floor(Duse / L_min));
 // the spare depth is spread over the rows: thicker walls between rows, a back bar of bar_min
-L       = has_bar ? (drawer_depth - bar_min) / rows_n : drawer_depth / rows_n;
+L       = has_bar ? (Duse - bar_min) / rows_n : Duse / rows_n;
 leftover = has_bar ? bar_min : 0;
 WB      = (L - LC) / 2;                                        // end wall
 floor_mid = floor_min + (LC / 2) * ta;
