@@ -15,6 +15,8 @@
 //                  "bar"    -> every slice (1..N) x 1  (leftover depth at the back)
 //  Read the "echo" output (console) for the computed layout and warnings.
 //
+//  Source, tests and issues: https://github.com/skjnldsv/spice-drawer-insert
+//
 //  SPDX-FileCopyrightText: 2026 John Molakvoæ
 //  SPDX-License-Identifier: CC-BY-NC-SA-4.0
 // ============================================================================

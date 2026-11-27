@@ -5,6 +5,14 @@
   "type": "module",
   "license": "CC-BY-NC-SA-4.0",
   "description": "Parametric OpenSCAD spice-jar drawer insert for MakerWorld, with a render test suite",
+  "homepage": "https://github.com/skjnldsv/spice-drawer-insert#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skjnldsv/spice-drawer-insert.git"
+  },
+  "bugs": {
+    "url": "https://github.com/skjnldsv/spice-drawer-insert/issues"
+  },
   "engines": {
     "node": ">=24"
   },
