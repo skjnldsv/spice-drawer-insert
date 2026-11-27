@@ -91,11 +91,8 @@ zc_mid  = floor_mid + R / ca;                                  // axis height at
 depth_mid = H - floor_mid;                                     // pocket depth at mid-length
 jar_top = zc_mid + (jar_length / 2) * sa + jar_diameter / 2;   // highest point of the jar (z)
 
-// --- back bar (jars lying across the width) ---
-Lb     = jar_length + end_clearance;                           // pocket length along its axis
-hb     = (Lb / 2) * ca + R * sa;                               // horizontal half footprint
-zc_b   = floor_min + (Lb / 2) * sa + R * ca;
-n_bar  = max(1, floor(Wuse / (2 * hb + min_gap)));
+// --- back bar (jars lying across the width, same pockets as the modules) ---
+n_bar  = max(1, floor(Wuse / (LC + min_gap)));
 pitch_b = Wuse / n_bar;
 bar_depth = leftover - 0.0;
 bar_ok = has_bar;                           // enough room for pockets?
@@ -166,8 +163,12 @@ module module_slice(x0, x1) {
 }
 
 // ------------------------------- back bar -------------------------------------
-module b_pocket(x, yc, r, ext) {
-    translate([x, yc, zc_b]) rotate([0, 90 - a, 0]) cylinder(r = r, h = Lb + 2 * ext, center = true);
+// module pocket turned to lie along X: tilted cylinder (lid end toward +X), vertical end walls
+module b_pocket(x, yc, r, x_ext) {
+    intersection() {
+        translate([x - LC / 2 - x_ext, yc - r - 1, -1]) cube([LC + 2 * x_ext, 2 * r + 2, H + 40]);
+        translate([x, yc, zc_mid]) rotate([0, 90 - a, 0]) cylinder(r = r, h = 300, center = true);
+    }
 }
 module x_prism(pts, x0, x1) {                    // profile (y,z) extruded along X
     translate([x0, 0, 0]) rotate([90, 0, 90]) linear_extrude(x1 - x0) polygon(pts);
@@ -186,18 +187,18 @@ module bar_slice(x0, x1) {
                 if (bar_ok) {
                     for (k = [k0 : k1]) {
                         xk = (k + 0.5) * pitch_b - x0;
-                        b_pocket(xk, yc, R + skin, skin);
+                        b_pocket(xk, yc, R + skin, wall);
                         // Y under the bowl, tilted like the pocket
-                        translate([xk, yc, zc_b - (R + skin) / ca]) rotate([0, -a, 0]) translate([-(Lb / 2) * ca, 0, 0])
-                            union() {
-                                x_prism([[-y_arm/2, -y_span], [y_arm/2, -y_span], [y_span + 6 + y_arm/2, 6], [y_span + 6 - y_arm/2, 6]], 0, Lb * ca);
-                                x_prism([[y_arm/2, -y_span], [-y_arm/2, -y_span], [-y_span - 6 - y_arm/2, 6], [-y_span - 6 + y_arm/2, 6]], 0, Lb * ca);
-                            }
+                        hl = (LC / 2 + wall) / ca;
+                        translate([xk, yc, zc_mid - (R + skin) / ca]) rotate([0, -a, 0]) {
+                            x_prism([[-y_arm/2, -y_span], [y_arm/2, -y_span], [y_span + 6 + y_arm/2, 6], [y_span + 6 - y_arm/2, 6]], -hl, hl);
+                            x_prism([[y_arm/2, -y_span], [-y_arm/2, -y_span], [-y_span - 6 - y_arm/2, 6], [-y_span - 6 + y_arm/2, 6]], -hl, hl);
+                        }
                     }
                     // central stem over the full length
                     translate([-1, yc - y_stem / 2, -5]) cube([w + 2, y_stem, zt + 6]);
                     // Y under the solid zones between/around pockets (arms reach the flat ceiling)
-                    hh = (Lb / 2 + skin) * ca + (R + skin) * sa;
+                    hh = LC / 2 + wall;
                     for (g = [0 : n_bar]) {
                         gx0 = (g == 0 ? -1 : (g - 0.5) * pitch_b - x0 + hh - 1);
                         gx1 = (g == n_bar ? w + 1 : (g + 0.5) * pitch_b - x0 - hh + 1);

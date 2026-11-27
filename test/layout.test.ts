@@ -1,7 +1,7 @@
 // Layout rules, checked on solid renders (fast). One render per case.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { render, close, defined } from './helpers.ts';
+import { render, close, defined, type RenderResult } from './helpers.ts';
 
 const SOLID = { style: 'solid' };
 
@@ -78,4 +78,23 @@ test('rows and back bar keep fit_margin of play on the depth, like on the width'
     const used = defined(layout.rows, 'rows') * defined(layout.rowLength, 'rowLength') + defined(layout.leftover, 'leftover');
     assert.ok(close(used, depth - 0.5, 0.01), `${JSON.stringify(base)}: rows + bar use ${used} mm of ${depth}`);
   }
+});
+
+/** Length of the pocket openings on the top face, along `axis` (vertices of the top face away from the outer edges). */
+function openingLength(r: RenderResult, axis: 0 | 1): number {
+  const { min, max, vertices } = r.mesh;
+  const along = vertices
+    .filter((p) => close(p[2], max[2], 0.001) && p[0] > min[0] + 0.5 && p[0] < max[0] - 0.5 && p[1] > min[1] + 0.5 && p[1] < max[1] - 0.5)
+    .map((p) => p[axis]);
+  return Math.max(...along) - Math.min(...along);
+}
+
+test('back bar pockets are as long as the module pockets', async () => {
+  // 250 mm drawer: one bar pocket, so the opening length is not mixed with the gaps between pockets
+  const base = { ...SOLID, drawer_width: 250 };
+  const [mod, bar] = await Promise.all([render(base), render({ ...base, piece: 'bar' })]);
+  assert.equal(bar.layout.barJars, 1);
+  const [lm, lb] = [openingLength(mod, 1), openingLength(bar, 0)];
+  assert.ok(close(lm, 125.14, 0.05), `module pocket ${lm.toFixed(2)} mm`);
+  assert.ok(close(lb, lm, 0.05), `bar pocket ${lb.toFixed(2)} mm, module pocket ${lm.toFixed(2)} mm`);
 });

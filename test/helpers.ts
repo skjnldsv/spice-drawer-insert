@@ -17,8 +17,11 @@ export const FAST = !!process.env.SPICE_FAST;   // force the solid style everywh
 
 export type Params = Record<string, string | number>;
 
+type Vec3 = [number, number, number];
+
 export interface Mesh {
   triangles: number;
+  vertices: Vec3[];
   size: [number, number, number];
   min: [number, number, number];
   max: [number, number, number];
@@ -110,8 +113,6 @@ export function parseLayout(echoes: string[]): Layout {
   };
 }
 
-type Vec3 = [number, number, number];
-
 /** Parse an ASCII STL: bounds, signed volume and manifoldness (every edge shared by exactly two faces). */
 export function analyse(stl: string): Mesh {
   const v: Vec3[] = [];
@@ -136,6 +137,7 @@ export function analyse(stl: string): Mesh {
   for (const n of edges.values()) if (n !== 2) bad++;
   return {
     triangles: v.length / 3,
+    vertices: v,
     size: [max[0] - min[0], max[1] - min[1], max[2] - min[2]],
     min,
     max,
