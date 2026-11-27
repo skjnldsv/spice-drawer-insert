@@ -1,16 +1,63 @@
 name: test
+
 on:
   push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+  typecheck:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: 22
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: test (OpenSCAD ${{ matrix.openscad }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # wasm: 2025 snapshot bundled in openscad-wasm. 2021.01: what MakerWorld is compatible with.
+        openscad: [wasm, '2021.01']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Install OpenSCAD 2021.01
+        if: matrix.openscad == '2021.01'
+        env:
+          APPIMAGE_SHA256: f758528f2cd213f773c7a105fb63bf3b45bf754b0f586fbb7c9cd653ffcd0882
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -fsSLo openscad.AppImage https://files.openscad.org/OpenSCAD-2021.01-x86_64.AppImage
+          echo "$APPIMAGE_SHA256  openscad.AppImage" | sha256sum --check --strict
+          chmod +x openscad.AppImage
+          ./openscad.AppImage --appimage-extract > /dev/null
+          echo "OPENSCAD_BIN=$PWD/squashfs-root/AppRun" >> "$GITHUB_ENV"
+          echo "QT_QPA_PLATFORM=offscreen" >> "$GITHUB_ENV"
+          QT_QPA_PLATFORM=offscreen squashfs-root/AppRun --version
+
       - run: npm test

@@ -33,13 +33,22 @@ Open the console to read the computed layout (`echo` lines) and warnings.
 
 ## Tests
 
-The suite renders the script with OpenSCAD (WebAssembly build, no install needed) for many parameter sets and checks
-the layout, the slicing (slices add up to the drawer width, every piece fits the bed) and that every mesh is manifold.
+The suite renders the script with OpenSCAD for many parameter sets and checks the layout, the slicing (slices add up
+to the drawer width, every piece fits the bed) and that every mesh is manifold. It needs Node.js 24 or later.
 
 ```sh
-npm install
+npm ci
+npm run typecheck
 npm test          # everything, a few minutes (hollow renders are slow)
-npm run test:fast # solid style only, about a minute
+npm run test:fast # solid style only
+```
+
+By default it uses the WebAssembly build from `openscad-wasm` (a 2025 development snapshot, no install needed).
+Set `OPENSCAD_BIN` to run it on a native binary instead. CI runs it on both, the native one being OpenSCAD 2021.01,
+the release MakerWorld's Parametric Model Maker is compatible with:
+
+```sh
+OPENSCAD_BIN=/path/to/openscad npm test
 ```
 
 ## Jar presets
